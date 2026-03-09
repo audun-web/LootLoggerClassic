@@ -1,0 +1,12 @@
+## Interface: 11507
+## Title: LootLoggerClassic
+## Notes: Logs all loot you receive and stores it in a history.
+## Author: Audun
+## Version: 1.0
+## SavedVariables: LootLoggerClassicDB
+
+LootLoggerClassic.lua
+Events.lua
+Database.lua
+UI.lua
+Core.lua
