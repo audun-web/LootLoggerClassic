@@ -12,9 +12,9 @@ Make sure the addon loads correctly in the game.
 
 ### Tasks
 
-* [ ] Create addon folder `LootLoggerClassic`
-* [ ] Create `LootLoggerClassic.toc`
-* [ ] Add lua files to `.toc`
+* [x] Create addon folder `LootLoggerClassic`
+* [x] Create `LootLoggerClassic.toc`
+* [x] Add lua files to `.toc`
 
 Example:
 
@@ -32,8 +32,8 @@ events.lua
 UI.lua
 ```
 
-* [ ] Verify addon appears in WoW AddOn list
-* [ ] Add basic load test in `core.lua`
+* [x] Verify addon appears in WoW AddOn list
+* [x] Add basic load test in `core.lua`
 
 Example:
 
@@ -41,7 +41,7 @@ Example:
 print("LootLoggerClassic loaded!")
 ```
 
-* [ ] Confirm message prints in chat when logging in
+* [x] Confirm message prints in chat when logging in
 
 ---
 
@@ -53,7 +53,7 @@ Create a database that persists between play sessions.
 
 ### Tasks
 
-* [ ] Define SavedVariables in `.toc`
+* [x] Define SavedVariables in `.toc`
 
 ```
 ## SavedVariables: LootLoggerClassicDB
