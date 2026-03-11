@@ -1,160 +1,68 @@
 # LootLoggerClassic – TODO
 
-A **World of Warcraft Classic addon** that logs all loot received and stores it in a persistent history.
-
----
-
-# Phase 1 – Basic Addon Setup
-
-## Goal
-
-Make sure the addon loads correctly in the game.
-
-### Tasks
+# Phase 1 - Core Addon Setup
 
 * [x] Create addon folder `LootLoggerClassic`
 * [x] Create `LootLoggerClassic.toc`
-* [x] Add lua files to `.toc`
-
-Example:
-
-```
-## Interface: 11507
-## Title: LootLoggerClassic
-## Notes: Logs all loot you receive.
-## Author: Audun
-## Version: 1.0
-## SavedVariables: LootLoggerClassicDB
-
-core.lua
-database.lua
-events.lua
-UI.lua
-```
-
-* [x] Verify addon appears in WoW AddOn list
-* [x] Add basic load test in `core.lua`
-
-Example:
-
-```lua
-print("LootLoggerClassic loaded!")
-```
-
-* [x] Confirm message prints in chat when logging in
+* [x] Add lua files `core.lua, database.lua, events.lua, UI.lua`
+* [x] Register `SavedVariables: LootLoggerClassicDB`
+* [x] Add load message `print("LootLoggerClassic loaded!")`
+* [x] Verify addon loads in game
+* [x] Verify addon appears in AddOns list
 
 ---
 
-# Phase 2 – Database System
+# Phase 2 - Database System
 
-## Goal
-
-Create a database that persists between play sessions.
-
-### Tasks
-
-* [x] Define SavedVariables in `.toc`
-
-```
-## SavedVariables: LootLoggerClassicDB
-```
-
-* [ ] Initialize database in `database.lua`
-
-Example:
-
-```lua
-LootLoggerClassicDB = LootLoggerClassicDB or {}
-LootLoggerClassicDB.loot = LootLoggerClassicDB.loot or {}
-```
-
-* [ ] Create function `AddLootEntry(itemLink, quantity)`
-
-Each entry should store:
-
-* item link
-* quantity
-* time
-* date
-* zone
-
-Example structure:
-
-```lua
-{
-  item = itemLink,
-  quantity = amount,
-  time = date("%H:%M:%S"),
-  date = date("%Y-%m-%d"),
-  zone = GetZoneText()
-}
-```
+* [x] Initialize database table `LootLoggerClassicDB`
+* [x] Create sub-table `LootLoggerClassicDB.loot`
+* [x] Create function `AddLootEntry(itemLink, quantity)`
+* [x] Store item link
+* [x] Store quantity
+* [x] Store time `date("%H:%M:%S")`
+* [x] Store date `date("%Y-%m-%d")`
+* [x] Store zone `GetZoneText()`
+* [x] Add debug print when loot is logged
+* [x] Verify loot entries appear in database
 
 ---
 
-# Phase 3 – Detect Loot Events
+# Phase 3 - Loot Event Detection
 
-## Goal
-
-Detect when the player receives loot.
-
-### Tasks
-
-* [ ] Register event `CHAT_MSG_LOOT`
-* [ ] Detect if the message belongs to the player
-* [ ] Extract:
-
-  * item link
-  * quantity
-* [ ] Call `AddLootEntry()` when loot is detected
-
-Test with:
-
-```
-/reload
-```
-
-Then loot mobs and confirm entries are saved.
+* [x] Register event `CHAT_MSG_LOOT`
+* [x] Detect if loot belongs to the player
+* [x] Extract item link from chat message
+* [x] Extract quantity from chat message
+* [x] Call `AddLootEntry()` when loot is detected
+* [x] Test loot from mobs
+* [x] Test loot from containers/chests
+* [x] Test loot from gathering professions
 
 ---
 
-# Phase 4 – Debug Commands
-
-## Goal
-
-Make testing easier.
-
-### Tasks
+# Phase 4 - Debug & Chat Commands
 
 * [ ] Create slash command `/lltest`
-* [ ] Print the last 5 loot entries
+* [ ] Print last 5 loot entries in chat
+* [ ] Create slash command `/llhistory`
+* [ ] Print full loot history
 * [ ] Create slash command `/llclear`
-* [ ] Clear the database for testing
+* [ ] Clear loot database for testing
 
 ---
 
-# Phase 5 – Loot History UI
+# Phase 5 - Loot History UI
 
-## Goal
+* [ ] Create main UI frame
+* [ ] Add title `Loot History`
+* [ ] Add background/backdrop
+* [ ] Add close button `esc`
+* [ ] Add scrollable loot list
+* [ ] Populate list with loot entries
+* [ ] Display `[time] item xquantity`
+* [ ] Add command `/lootlogger` to open UI
 
-Display loot history in a window.
-
-### Tasks
-
-* [ ] Create main frame in `UI.lua`
-* [ ] Set frame size and position
-* [ ] Add backdrop
-* [ ] Add title **"Loot History"**
-* [ ] Add scroll frame for many entries
-* [ ] Populate UI with loot entries
-
-Each row should display:
-
-```
-[Time] Item Name xAmount
-```
-
-Example:
+Example row:
 
 ```
 [14:32] Linen Cloth x3
@@ -162,67 +70,45 @@ Example:
 
 ---
 
-# Phase 6 – Item Quality Colors
+# Phase 6 - Item Quality & Visual Polish
 
-## Goal
-
-Color loot based on rarity.
-
-### Tasks
-
-* [ ] Use `GetItemInfo(itemLink)`
-* [ ] Get item quality
-* [ ] Apply color using:
-
-```lua
-ITEM_QUALITY_COLORS
-```
-
-Example colors:
-
-* Grey – Poor
-* White – Common
-* Green – Uncommon
-* Blue – Rare
-* Purple – Epic
+* [ ] Detect item quality `GetItemInfo()`
+* [ ] Apply item color using `ITEM_QUALITY_COLORS`
+* [ ] Highlight rare items
+* [ ] Add spacing and alignment improvements
+* [ ] Improve UI readability
 
 ---
 
-# Phase 7 – Advanced Features
+# Phase 7 - Statistics System
 
-Optional improvements.
-
-### Possible Features
-
-* [ ] Filter by item rarity
-* [ ] Filter by zone
-* [ ] Search by item name
-* [ ] Show total number of items looted
-* [ ] Show most common item
-* [ ] Show rarest item
-* [ ] Export loot history to chat
+* [ ] Track total items looted
+* [ ] Track most common item
+* [ ] Track rarest item
+* [ ] Count total loot entries
+* [ ] Show statistics in UI
 
 ---
 
-# Phase 8 – Polish
+# Phase 8 - Advanced Features
 
-## Goal
+* [ ] Add rarity filter `common/uncommon/rare/epic`
+* [ ] Add zone filter
+* [ ] Add item name search
+* [ ] Add export loot history to chat
+* [ ] Add export format for spreadsheet
+* [ ] Add session loot counter
 
-Make the addon feel complete.
+---
 
-### Tasks
+# Phase 9 - Advanced Polish
 
-* [ ] Add slash command `/lootlogger`
-* [ ] Open loot history window
-* [ ] Add close button
-* [ ] Allow ESC to close window
-* [ ] Improve layout and spacing
-* [ ] Test in:
-
-  * solo play
-  * party
-  * dungeon
-  * raid
+* [ ] Add draggable UI window
+* [ ] Add minimap button
+* [ ] Add interface options menu
+* [ ] Add sound notification for rare drops
+* [ ] Optimize performance for large loot history
+* [ ] Add version number display in UI
 
 ---
 
@@ -230,21 +116,7 @@ Make the addon feel complete.
 
 A complete addon that:
 
-✔ Logs every item you loot
-✔ Saves loot history permanently
-✔ Displays loot history in a clean UI
-✔ Supports filtering and statistics
-
----
-
-# Learning Goals
-
-Through this project you will practice:
-
-* WoW Events
-* Lua Tables
-* SavedVariables
-* Frame UI creation
-* ScrollFrames
-* Slash commands
-* Structuring a real addon project
+✔ Logs every item the player loots
+✔ Stores loot history permanently
+✔ Displays loot history in a scrollable UI
+✔ Supports filtering, statistics, and export tools
