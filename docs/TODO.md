@@ -42,8 +42,8 @@
 
 # Phase 4 - Debug & Chat Commands
 
-* [ ] Create slash command `/lltest`
-* [ ] Print last 5 loot entries in chat
+* [x] Create slash command `/lltest`
+* [x] Print last 5 loot entries in chat
 * [ ] Create slash command `/llhistory`
 * [ ] Print full loot history
 * [ ] Create slash command `/llclear`
