@@ -14,3 +14,29 @@ SlashCmdList["LLTEST"] = function()
 
     print("=====================")
 end
+
+
+
+
+SLASH_LLHISTORY1 = "/llhistory" -- chat command for å printe alt
+SlashCmdList["LLHISTORY"] = function()
+
+    print("=== Loot Database ===")
+
+    for i, entry in ipairs(LootLoggerClassicDB.loot) do local itemName = string.match(entry.item, "%[(.-)%]") -- hent navn 
+        local realLink = select(2, GetItemInfo(itemName)) or entry.item print(i .. ": " .. realLink .. " x" .. entry.quantity .. " | " .. entry.time .. " | " .. entry.date .. " | " .. entry.zone) 
+    end
+
+    print("=====================")
+end
+    
+
+SLASH_LLCLEAR1 = "/llclear"
+SlashCmdList["LLCLEAR"] = function()
+    if LootLoggerClassicDB and LootLoggerClassicDB.loot then
+        LootLoggerClassicDB.loot = {}
+        print("Loot database cleared!")
+    else
+        print("No loot database found!")
+    end
+end

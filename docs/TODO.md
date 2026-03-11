@@ -44,10 +44,10 @@
 
 * [x] Create slash command `/lltest`
 * [x] Print last 5 loot entries in chat
-* [ ] Create slash command `/llhistory`
-* [ ] Print full loot history
-* [ ] Create slash command `/llclear`
-* [ ] Clear loot database for testing
+* [x] Create slash command `/llhistory`
+* [x] Print full loot history
+* [x] Create slash command `/llclear`
+* [x] Clear loot database for testing
 
 ---
 
