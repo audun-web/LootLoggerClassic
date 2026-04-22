@@ -25,3 +25,10 @@ titleText:SetJustifyH("CENTER")
 
 titleText:SetWidth(300)
 titleText:SetWordWrap(true)
+
+tinsert(UISpecialFrames, "LootLoggerMainFrame")
+
+local closeButton = CreateFrame("Button", nil, LootLoggerMainFrame, "UIPanelCloseButton")
+
+closeButton:SetSize(32, 32)
+closeButton:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -5, -5)

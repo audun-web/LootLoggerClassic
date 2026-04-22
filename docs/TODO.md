@@ -54,8 +54,8 @@
 # Phase 5 - Loot History UI
 
 * [x] Create main UI frame
-* [ ] Add title `Loot History`
-* [ ] Add background/backdrop
+* [x] Add title `Loot History`
+* [x] Add background/backdrop
 * [ ] Add close button `esc`
 * [ ] Add scrollable loot list
 * [ ] Populate list with loot entries
