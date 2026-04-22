@@ -53,7 +53,7 @@
 
 # Phase 5 - Loot History UI
 
-* [ ] Create main UI frame
+* [x] Create main UI frame
 * [ ] Add title `Loot History`
 * [ ] Add background/backdrop
 * [ ] Add close button `esc`

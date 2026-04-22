@@ -1,3 +1,4 @@
+
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("CHAT_MSG_LOOT")
 

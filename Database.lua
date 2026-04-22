@@ -1,3 +1,4 @@
+
 -- starter databasen
 
 LootLoggerClassicDB = LootLoggerClassicDB or {}

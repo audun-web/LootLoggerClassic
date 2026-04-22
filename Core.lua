@@ -40,3 +40,9 @@ SlashCmdList["LLCLEAR"] = function()
         print("No loot database found!")
     end
 end
+
+
+SLASH_LOOTLOGGER1 = "/lootlogger"
+SlashCmdList["LOOTLOGGER"] = function()
+    LootLoggerMainFrame:SetShown(not LootLoggerMainFrame:IsShown()) -- hvis den er skjult vis, hvis den er vist, skjul
+end
