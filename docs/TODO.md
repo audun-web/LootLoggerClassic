@@ -56,11 +56,11 @@
 * [x] Create main UI frame
 * [x] Add title `Loot History`
 * [x] Add background/backdrop
-* [ ] Add close button `esc`
-* [ ] Add scrollable loot list
-* [ ] Populate list with loot entries
-* [ ] Display `[time] item xquantity`
-* [ ] Add command `/lootlogger` to open UI
+* [x] Add close button `esc`
+* [x] Add scrollable loot list
+* [x] Populate list with loot entries
+* [x] Display `[time] item xquantity`
+* [x] Add command `/lootlogger` to open UI
 
 Example row:
 
@@ -72,10 +72,10 @@ Example row:
 
 # Phase 6 - Item Quality & Visual Polish
 
-* [ ] Detect item quality `GetItemInfo()`
-* [ ] Apply item color using `ITEM_QUALITY_COLORS`
+* [x] Detect item quality `GetItemInfo()`
+* [x] Apply item color using `ITEM_QUALITY_COLORS`
 * [ ] Highlight rare items
-* [ ] Add spacing and alignment improvements
+* [x] Add spacing and alignment improvements
 * [ ] Improve UI readability
 
 ---

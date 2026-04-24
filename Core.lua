@@ -44,5 +44,10 @@ end
 
 SLASH_LOOTLOGGER1 = "/lootlogger"
 SlashCmdList["LOOTLOGGER"] = function()
-    LootLoggerMainFrame:SetShown(not LootLoggerMainFrame:IsShown()) -- hvis den er skjult vis, hvis den er vist, skjul
+    if LootLoggerMainFrame:IsShown() then
+        LootLoggerMainFrame:Hide()
+    else
+        LootLoggerMainFrame:Show()
+        UpdateLootList()
+    end
 end
