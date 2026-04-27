@@ -59,6 +59,9 @@ local zoneHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNor
 zoneHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 450, -35)
 zoneHeader:SetText("Zone")
 
+local totalText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+totalText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -20)
+
 
 function UpdateLootList()
 
@@ -136,9 +139,13 @@ function UpdateLootList()
         row:SetScript("OnLeave", function()
             GameTooltip:Hide()
         end)
+        
 
         yOffset = yOffset - 28
     end
 
     content:SetHeight(-yOffset)
+
+    local total = GetTotalItemsLooted()
+    totalText:SetText("Total items: " .. total)
 end
