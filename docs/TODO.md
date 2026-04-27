@@ -74,9 +74,9 @@ Example row:
 
 * [x] Detect item quality `GetItemInfo()`
 * [x] Apply item color using `ITEM_QUALITY_COLORS`
-* [ ] Highlight rare items
+* [x] Highlight rare items
 * [x] Add spacing and alignment improvements
-* [ ] Improve UI readability
+* [x] Improve UI readability
 
 ---
 

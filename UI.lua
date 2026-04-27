@@ -1,7 +1,7 @@
 
 local LootLoggerFrame = CreateFrame("Frame", "LootLoggerMainFrame", UIParent, "BackdropTemplate") -- main frame
 
-LootLoggerFrame:SetSize(400, 300) -- størrelse
+LootLoggerFrame:SetSize(700, 400) -- størrelse
 LootLoggerFrame:SetPoint("CENTER") -- posisjon
 
 LootLoggerFrame:SetBackdrop({ -- utseende
@@ -44,45 +44,75 @@ content:SetSize(1, 1)
 scrollFrame:SetScrollChild(content)
 
 
+-- Item header
+local itemHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+itemHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 40, -35)
+itemHeader:SetText("Item")
+
+-- Time header
+local timeHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+timeHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 350, -35)
+timeHeader:SetText("Time")
+
+-- Zone header
+local zoneHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+zoneHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 450, -35)
+zoneHeader:SetText("Zone")
+
+
 function UpdateLootList()
 
     -- Rydd gamle entries
-    for i, child in ipairs({content:GetChildren()}) do -- for alle items inne i scroll området
-        child:Hide() -- sletter gamle UI rows
+    for i, child in ipairs({content:GetChildren()}) do
+        child:Hide()
     end
 
-    local yOffset = -10 -- starter litt under toppen
+    local yOffset = -10 -- mellomrom fra toppen
 
-    for i, entry in ipairs(LootLoggerClassicDB.loot) do -- for alle ting "i rekkefølge"
+    for i = #LootLoggerClassicDB.loot, 1, -1 do -- for alle items, baklengs
+        local entry = LootLoggerClassicDB.loot[i]
 
-        local row = CreateFrame("Button", nil, content) -- lager en usynlig knapp, denne brukes for å kunne trykke på items
-        row:SetSize(320, 20)
+        local row = CreateFrame("Button", nil, content)
+        row:SetSize(600, 25)
         row:SetPoint("TOPLEFT", content, "TOPLEFT", 10, yOffset)
 
-        row.bg = row:CreateTexture(nil, "BACKGROUND") -- lager bakgrunn
-        row.bg:SetAllPoints() -- dekker hele rowen
-        
-        local text = row:CreateFontString(nil, "OVERLAY", "GameFontNormal") -- lager tekst inni den usynlige knappen
-        text:SetPoint("LEFT")
-        
         local itemName = string.match(entry.item, "%[(.-)%]")
         local itemLink = select(2, GetItemInfo(itemName))
+        local texture = select(10, GetItemInfo(itemName))
 
-        local itemQuality = nil
+        local itemQuality = itemLink and select(3, GetItemInfo(itemLink)) or 1
+        local color = ITEM_QUALITY_COLORS[itemQuality or 1]
 
-        if itemLink then
-            itemQuality = select(3, GetItemInfo(itemLink))
+        local icon = row:CreateTexture(nil, "ARTWORK")
+        icon:SetSize(18, 18)
+        icon:SetPoint("LEFT", row, "LEFT", 5, 0)
+
+        if texture then
+            icon:SetTexture(texture)
         end
 
-        itemQuality = itemQuality or 1
-        local color = ITEM_QUALITY_COLORS[itemQuality]
-        
-        if color then -- gjenbruker farge infoen vi allerede har til å fargelegge bakgrunnen
-            row.bg:SetColorTexture(color.r, color.g, color.b, 0.15)
-        else
-            row.bg:SetColorTexture(1, 1, 1, 0.05)
-        end
+        local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        nameText:SetPoint("LEFT", row, "LEFT", 30, 0)
+        nameText:SetWidth(300)
 
+        nameText:SetText(
+            (color.hex or "|cffffffff") ..
+            itemName ..
+            "|r x" .. entry.quantity
+        )
+
+        local timeText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        timeText:SetPoint("LEFT", row, "LEFT", 350, 0)
+        timeText:SetText(entry.time)
+
+        local zoneText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        zoneText:SetPoint("LEFT", row, "LEFT", 450, 0)
+        zoneText:SetText(entry.zone or "Unknown")
+
+        row.bg = row:CreateTexture(nil, "BACKGROUND")
+        row.bg:SetAllPoints()
+
+        row.bg:SetColorTexture(color.r, color.g, color.b, 0.1)
 
         row.border = CreateFrame("Frame", nil, row, "BackdropTemplate")
         row.border:SetPoint("TOPLEFT", -1, 1)
@@ -93,40 +123,22 @@ function UpdateLootList()
             edgeSize = 8,
         })
 
-        if color then
-            row.border:SetBackdropBorderColor(color.r, color.g, color.b, 0.6)
-        else
-            row.border:SetBackdropBorderColor(1, 1, 1, 0.2)
-        end
+        row.border:SetBackdropBorderColor(color.r, color.g, color.b, 0.5)
 
-
-        text:SetText( -- setter tekst til informasjonen vi hentet fra game server
-            entry.time .. " - " ..
-            (color.hex or "|cffffffff") ..
-            entry.item ..
-            "|r x" .. entry.quantity
-        )
-        
         row:SetScript("OnClick", function()
-            local itemName = string.match(entry.item, "%[(.-)%]") -- henter item name
-            local itemLink = select(2, GetItemInfo(itemName)) -- henter klikkbar link for item til game server
-        
-            if itemLink then -- viser tooltip
+            if itemLink then
                 GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
                 GameTooltip:SetHyperlink(itemLink)
                 GameTooltip:Show()
-            else
-                print("Item not cached yet:", itemName)
             end
         end)
 
-        row:SetScript("OnLeave", function() -- gjemmer tooltip når mus forlater item
+        row:SetScript("OnLeave", function()
             GameTooltip:Hide()
         end)
 
-        yOffset = yOffset - 25 -- mellomrom mellom radene
+        yOffset = yOffset - 28
     end
 
-    content:SetHeight(-yOffset) -- høyden til listen basert på høyden til items
-
+    content:SetHeight(-yOffset)
 end
