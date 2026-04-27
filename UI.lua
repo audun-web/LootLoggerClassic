@@ -58,13 +58,48 @@ function UpdateLootList()
         local row = CreateFrame("Button", nil, content) -- lager en usynlig knapp, denne brukes for å kunne trykke på items
         row:SetSize(320, 20)
         row:SetPoint("TOPLEFT", content, "TOPLEFT", 10, yOffset)
+
+        row.bg = row:CreateTexture(nil, "BACKGROUND") -- lager bakgrunn
+        row.bg:SetAllPoints() -- dekker hele rowen
         
         local text = row:CreateFontString(nil, "OVERLAY", "GameFontNormal") -- lager tekst inni den usynlige knappen
         text:SetPoint("LEFT")
         
-        local _, _, itemQuality = GetItemInfo(entry.item) -- henter informasjon om item "rarity"
-        local color = ITEM_QUALITY_COLORS[itemQuality or 1]
+        local itemName = string.match(entry.item, "%[(.-)%]")
+        local itemLink = select(2, GetItemInfo(itemName))
+
+        local itemQuality = nil
+
+        if itemLink then
+            itemQuality = select(3, GetItemInfo(itemLink))
+        end
+
+        itemQuality = itemQuality or 1
+        local color = ITEM_QUALITY_COLORS[itemQuality]
         
+        if color then -- gjenbruker farge infoen vi allerede har til å fargelegge bakgrunnen
+            row.bg:SetColorTexture(color.r, color.g, color.b, 0.15)
+        else
+            row.bg:SetColorTexture(1, 1, 1, 0.05)
+        end
+
+
+        row.border = CreateFrame("Frame", nil, row, "BackdropTemplate")
+        row.border:SetPoint("TOPLEFT", -1, 1)
+        row.border:SetPoint("BOTTOMRIGHT", 1, -1)
+
+        row.border:SetBackdrop({
+            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+            edgeSize = 8,
+        })
+
+        if color then
+            row.border:SetBackdropBorderColor(color.r, color.g, color.b, 0.6)
+        else
+            row.border:SetBackdropBorderColor(1, 1, 1, 0.2)
+        end
+
+
         text:SetText( -- setter tekst til informasjonen vi hentet fra game server
             entry.time .. " - " ..
             (color.hex or "|cffffffff") ..
@@ -89,7 +124,7 @@ function UpdateLootList()
             GameTooltip:Hide()
         end)
 
-        yOffset = yOffset - 22 -- mellomrom mellom radene
+        yOffset = yOffset - 25 -- mellomrom mellom radene
     end
 
     content:SetHeight(-yOffset) -- høyden til listen basert på høyden til items
