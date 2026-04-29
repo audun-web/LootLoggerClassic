@@ -90,8 +90,7 @@ Example row:
 # Phase 8 - Advanced Features
 
 * [x] Add rarity filter `common/uncommon/rare/epic`
-* [ ] Add zone filter
-* [ ] Add item name search
+* [x] Add item name search
 * [ ] Add session loot counter
 
 ---

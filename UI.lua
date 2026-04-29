@@ -4,6 +4,9 @@ local LootLoggerFrame = CreateFrame("Frame", "LootLoggerMainFrame", UIParent, "B
 
 local currentFilter = "ALL"
 
+local itemSearchQuery = "" -- tekst i søkefeltet (matcher mot itemnavn)
+local ITEM_SEARCH_PLACEHOLDER = "Search item..." -- vises når søket er tomt
+
 function PassesFilter(itemQuality) -- funksjon som sjekker rarity
 
     if currentFilter == "ALL" then
@@ -29,7 +32,21 @@ function PassesFilter(itemQuality) -- funksjon som sjekker rarity
     return false
 end
 
-LootLoggerFrame:SetSize(700, 400) -- størrelse
+function PassesSearch(itemName) -- funksjon som sjekker itemnavn mot søketekst
+    if not itemSearchQuery or itemSearchQuery == "" then
+        return true
+    end
+
+    if not itemName then
+        return false
+    end
+
+    local queryLower = string.lower(itemSearchQuery)
+    local nameLower = string.lower(itemName)
+    return string.find(nameLower, queryLower, 1, true) ~= nil -- substring-match (ikke regex)
+end
+
+LootLoggerFrame:SetSize(700, 450) -- størrelse
 LootLoggerFrame:SetPoint("CENTER") -- posisjon
 
 LootLoggerFrame:SetBackdrop({ -- utseende
@@ -40,7 +57,7 @@ LootLoggerFrame:SetBackdrop({ -- utseende
     edgeSize = 16,
 })
 
-LootLoggerFrame:SetBackdropColor(0, 0, 0, 0.8) -- gjør bakgrunn litt gjennomsiktig
+LootLoggerFrame:SetBackdropColor(0, 0, 0, 0.95) -- gjør bakgrunn litt gjennomsiktig
 
 LootLoggerFrame:Hide()
 
@@ -62,7 +79,7 @@ closeButton:SetSize(32, 32)
 closeButton:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -5, -5)
 
 local scrollFrame = CreateFrame("ScrollFrame", nil, LootLoggerFrame, "UIPanelScrollFrameTemplate") -- lager skrollbar meny med innebygd funksjon i spillfilene
-scrollFrame:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -50)
+scrollFrame:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -70)
 scrollFrame:SetPoint("BOTTOMRIGHT", LootLoggerFrame, "BOTTOMRIGHT", -30, 10)
 
 
@@ -72,26 +89,75 @@ content:SetSize(1, 1)
 scrollFrame:SetScrollChild(content)
 
 
--- Item header
-local itemHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-itemHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 40, -35)
-itemHeader:SetText("Item")
-
 -- Time header
 local timeHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-timeHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 350, -35)
+timeHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 370, -55)
 timeHeader:SetText("Time")
 
 -- Zone header
 local zoneHeader = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-zoneHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 450, -35)
+zoneHeader:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 470, -55)
 zoneHeader:SetText("Zone")
+
+-- Item search bar (over item row'ene)
+local searchBox = CreateFrame("EditBox", nil, LootLoggerFrame, "InputBoxTemplate")
+searchBox:SetSize(290, 18) -- størrelse på søkefeltet
+searchBox:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 40, -52) -- plasserer søkefeltet over item-radene
+searchBox:SetAutoFocus(false) -- auto-focus av
+searchBox:SetMultiLine(false) -- kun én linje
+searchBox:SetMaxLetters(64) -- maks antall tegn
+searchBox:SetText(ITEM_SEARCH_PLACEHOLDER) -- viser placeholder når søket er tomt
+searchBox:SetTextColor(0.5, 0.5, 0.5) -- grå farge for placeholder
+
+searchBox:SetScript("OnEditFocusGained", function(self)
+    -- når brukeren klikker i feltet: fjern placeholder
+    if self:GetText() == ITEM_SEARCH_PLACEHOLDER then
+        self:SetText("")
+        self:SetTextColor(1, 1, 1)
+        itemSearchQuery = ""
+        UpdateLootList()
+    end
+end)
+
+searchBox:SetScript("OnEditFocusLost", function(self)
+    -- hvis feltet blir tomt: sett placeholder tilbake
+    if self:GetText() == "" then
+        self:SetText(ITEM_SEARCH_PLACEHOLDER)
+        self:SetTextColor(0.5, 0.5, 0.5)
+        itemSearchQuery = ""
+        UpdateLootList()
+    end
+end)
+
+searchBox:SetScript("OnTextChanged", function(self)
+    -- mens brukeren skriver: lagre query og oppdater liste
+    local text = self:GetText()
+    if not text or text == "" or text == ITEM_SEARCH_PLACEHOLDER then
+        itemSearchQuery = ""
+    else
+        itemSearchQuery = text
+    end
+    UpdateLootList()
+end)
+
+searchBox:SetScript("OnEscapePressed", function(self)
+    -- ESC: tøm søket og bruk placeholder igjen
+    if self:GetText() ~= ITEM_SEARCH_PLACEHOLDER then
+        self:SetText(ITEM_SEARCH_PLACEHOLDER)
+        self:SetTextColor(0.5, 0.5, 0.5)
+        itemSearchQuery = ""
+        self:ClearFocus()
+        UpdateLootList()
+    else
+        self:ClearFocus()
+    end
+end)
 
 local totalText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 totalText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -20)
 
 local dropdown = CreateFrame("Frame", "LootLoggerFilterDropdown", LootLoggerFrame, "UIDropDownMenuTemplate") -- lager filter dropdown
-dropdown:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -10)
+dropdown:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -6)
 
 UIDropDownMenu_SetWidth(dropdown, 120) -- setter bredde
 UIDropDownMenu_SetText(dropdown, "Filter: All") -- standard tekst når vinduet åpnes
@@ -130,14 +196,14 @@ function UpdateLootList() -- bygger opp loot-lista i UI på nytt
     for i = #LootLoggerClassicDB.loot, 1, -1 do -- looper baklengs så nyeste loot vises øverst
         local entry = LootLoggerClassicDB.loot[i]
 
-        local itemName = string.match(entry.item, "%[(.-)%]") -- henter itemnavn uten [] fra loggstrengen
+        local itemName = string.match(entry.item, "%[(.-)%]") or "" -- henter itemnavn uten [] fra loggstrengen
         local itemLink = select(2, GetItemInfo(itemName)) -- prøver å hente item link
         local texture = select(10, GetItemInfo(itemName)) -- prøver å hente item ikon
 
         local itemQuality = itemLink and select(3, GetItemInfo(itemLink)) or 1 -- fallback til common hvis info mangler
 
-        -- sjekker om item passer valgt filter før rad bygges
-        if PassesFilter(itemQuality) then
+        -- sjekker om item passer valgt filter og søk før rad bygges
+        if PassesFilter(itemQuality) and PassesSearch(itemName) then
 
             local color = ITEM_QUALITY_COLORS[itemQuality or 1] -- farge basert på rarity
 
