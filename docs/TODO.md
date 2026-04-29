@@ -82,21 +82,16 @@ Example row:
 
 # Phase 7 - Statistics System
 
-* [ ] Track total items looted
-* [ ] Track most common item
-* [ ] Track rarest item
-* [ ] Count total loot entries
-* [ ] Show statistics in UI
+* [x] Track total items looted
+* [x] Show statistics in UI
 
 ---
 
 # Phase 8 - Advanced Features
 
-* [ ] Add rarity filter `common/uncommon/rare/epic`
+* [x] Add rarity filter `common/uncommon/rare/epic`
 * [ ] Add zone filter
 * [ ] Add item name search
-* [ ] Add export loot history to chat
-* [ ] Add export format for spreadsheet
 * [ ] Add session loot counter
 
 ---

@@ -1,6 +1,34 @@
 
 local LootLoggerFrame = CreateFrame("Frame", "LootLoggerMainFrame", UIParent, "BackdropTemplate") -- main frame
 
+
+local currentFilter = "ALL"
+
+function PassesFilter(itemQuality) -- funksjon som sjekker rarity
+
+    if currentFilter == "ALL" then
+        return true
+    end
+
+    if currentFilter == "COMMON" and itemQuality == 1 then
+        return true
+    end
+
+    if currentFilter == "UNCOMMON" and itemQuality == 2 then
+        return true
+    end
+
+    if currentFilter == "RARE" and itemQuality == 3 then
+        return true
+    end
+
+    if currentFilter == "EPIC" and itemQuality == 4 then
+        return true
+    end
+
+    return false
+end
+
 LootLoggerFrame:SetSize(700, 400) -- størrelse
 LootLoggerFrame:SetPoint("CENTER") -- posisjon
 
@@ -62,90 +90,126 @@ zoneHeader:SetText("Zone")
 local totalText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 totalText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -20)
 
+local dropdown = CreateFrame("Frame", "LootLoggerFilterDropdown", LootLoggerFrame, "UIDropDownMenuTemplate") -- lager filter dropdown
+dropdown:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -10)
 
-function UpdateLootList()
+UIDropDownMenu_SetWidth(dropdown, 120) -- setter bredde
+UIDropDownMenu_SetText(dropdown, "Filter: All") -- standard tekst når vinduet åpnes
 
-    -- Rydd gamle entries
-    for i, child in ipairs({content:GetChildren()}) do
+UIDropDownMenu_Initialize(dropdown, function(self, level) -- fyller dropdown med valg
+
+    local function CreateOption(text, value) -- helper for å lage ett valg i menyen
+        local info = UIDropDownMenu_CreateInfo()
+        info.text = text
+        info.func = function() -- hva som skjer når brukeren velger filter
+            currentFilter = value -- lagrer aktivt filter
+            UIDropDownMenu_SetText(dropdown, "Filter: " .. text) -- oppdaterer teksten i dropdown
+            UpdateLootList() -- tegner lista på nytt med valgt filter
+        end
+        UIDropDownMenu_AddButton(info) -- legger valget inn i menyen
+    end
+
+    CreateOption("All", "ALL") 
+    CreateOption("Common", "COMMON") 
+    CreateOption("Uncommon", "UNCOMMON")
+    CreateOption("Rare", "RARE") 
+    CreateOption("Epic", "EPIC")
+
+end)
+
+
+function UpdateLootList() -- bygger opp loot-lista i UI på nytt
+
+    -- skjuler gamle rader før nye bygges
+    for _, child in ipairs({content:GetChildren()}) do
         child:Hide()
     end
 
-    local yOffset = -10 -- mellomrom fra toppen
+    local yOffset = -10 -- startposisjon for første rad
 
-    for i = #LootLoggerClassicDB.loot, 1, -1 do -- for alle items, baklengs
+    for i = #LootLoggerClassicDB.loot, 1, -1 do -- looper baklengs så nyeste loot vises øverst
         local entry = LootLoggerClassicDB.loot[i]
 
-        local row = CreateFrame("Button", nil, content)
-        row:SetSize(600, 25)
-        row:SetPoint("TOPLEFT", content, "TOPLEFT", 10, yOffset)
+        local itemName = string.match(entry.item, "%[(.-)%]") -- henter itemnavn uten [] fra loggstrengen
+        local itemLink = select(2, GetItemInfo(itemName)) -- prøver å hente item link
+        local texture = select(10, GetItemInfo(itemName)) -- prøver å hente item ikon
 
-        local itemName = string.match(entry.item, "%[(.-)%]")
-        local itemLink = select(2, GetItemInfo(itemName))
-        local texture = select(10, GetItemInfo(itemName))
+        local itemQuality = itemLink and select(3, GetItemInfo(itemLink)) or 1 -- fallback til common hvis info mangler
 
-        local itemQuality = itemLink and select(3, GetItemInfo(itemLink)) or 1
-        local color = ITEM_QUALITY_COLORS[itemQuality or 1]
+        -- sjekker om item passer valgt filter før rad bygges
+        if PassesFilter(itemQuality) then
 
-        local icon = row:CreateTexture(nil, "ARTWORK")
-        icon:SetSize(18, 18)
-        icon:SetPoint("LEFT", row, "LEFT", 5, 0)
+            local color = ITEM_QUALITY_COLORS[itemQuality or 1] -- farge basert på rarity
 
-        if texture then
-            icon:SetTexture(texture)
-        end
+            local row = CreateFrame("Button", nil, content) -- en klikkbar rad per item
+            row:SetSize(600, 25)
+            row:SetPoint("TOPLEFT", content, "TOPLEFT", 10, yOffset)
 
-        local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        nameText:SetPoint("LEFT", row, "LEFT", 30, 0)
-        nameText:SetWidth(300)
+            -- ikon på venstre side av raden
+            local icon = row:CreateTexture(nil, "ARTWORK")
+            icon:SetSize(18, 18)
+            icon:SetPoint("LEFT", row, "LEFT", 5, 0)
 
-        nameText:SetText(
-            (color.hex or "|cffffffff") ..
-            itemName ..
-            "|r x" .. entry.quantity
-        )
-
-        local timeText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        timeText:SetPoint("LEFT", row, "LEFT", 350, 0)
-        timeText:SetText(entry.time)
-
-        local zoneText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        zoneText:SetPoint("LEFT", row, "LEFT", 450, 0)
-        zoneText:SetText(entry.zone or "Unknown")
-
-        row.bg = row:CreateTexture(nil, "BACKGROUND")
-        row.bg:SetAllPoints()
-
-        row.bg:SetColorTexture(color.r, color.g, color.b, 0.1)
-
-        row.border = CreateFrame("Frame", nil, row, "BackdropTemplate")
-        row.border:SetPoint("TOPLEFT", -1, 1)
-        row.border:SetPoint("BOTTOMRIGHT", 1, -1)
-
-        row.border:SetBackdrop({
-            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-            edgeSize = 8,
-        })
-
-        row.border:SetBackdropBorderColor(color.r, color.g, color.b, 0.5)
-
-        row:SetScript("OnClick", function()
-            if itemLink then
-                GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
-                GameTooltip:SetHyperlink(itemLink)
-                GameTooltip:Show()
+            if texture then
+                icon:SetTexture(texture) -- setter item-ikon hvis vi fant et
             end
-        end)
 
-        row:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
-        
+            -- itemnavn + antall
+            local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            nameText:SetPoint("LEFT", row, "LEFT", 30, 0)
+            nameText:SetWidth(300)
 
-        yOffset = yOffset - 28
+            nameText:SetText(
+                (color.hex or "|cffffffff") ..
+                itemName ..
+                "|r x" .. entry.quantity
+            )
+
+            -- tidspunkt for loot
+            local timeText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            timeText:SetPoint("LEFT", row, "LEFT", 350, 0)
+            timeText:SetText(entry.time)
+
+            -- sone der looten skjedde
+            local zoneText = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            zoneText:SetPoint("LEFT", row, "LEFT", 450, 0)
+            zoneText:SetText(entry.zone or "Unknown")
+
+            -- svak bakgrunnsfarge etter rarity
+            row.bg = row:CreateTexture(nil, "BACKGROUND")
+            row.bg:SetAllPoints()
+            row.bg:SetColorTexture(color.r, color.g, color.b, 0.1)
+
+            -- tynn border med samme rarity-farge
+            row.border = CreateFrame("Frame", nil, row, "BackdropTemplate")
+            row.border:SetPoint("TOPLEFT", -1, 1)
+            row.border:SetPoint("BOTTOMRIGHT", 1, -1)
+
+            row.border:SetBackdrop({
+                edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+                edgeSize = 8,
+            })
+
+            row.border:SetBackdropBorderColor(color.r, color.g, color.b, 0.5)
+
+            -- viser item tooltip når raden klikkes
+            row:SetScript("OnClick", function()
+                if itemLink then
+                    GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
+                    GameTooltip:SetHyperlink(itemLink)
+                    GameTooltip:Show()
+                end
+            end)
+
+            row:SetScript("OnLeave", function() -- skjuler tooltip når musen forlater raden
+                GameTooltip:Hide()
+            end)
+
+            yOffset = yOffset - 28 -- flytter neste rad nedover
+        end
     end
 
-    content:SetHeight(-yOffset)
+    content:SetHeight(-yOffset) -- setter høyde på scroll-innholdet basert på antall rader
 
-    local total = GetTotalItemsLooted()
-    totalText:SetText("Total items: " .. total)
+    totalText:SetText("Total items: " .. GetTotalItemsLooted()) -- oppdaterer total antall loota items
 end
