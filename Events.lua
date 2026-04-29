@@ -12,13 +12,28 @@ eventFrame:SetScript("OnEvent", function(self, event, message)
     end
 
     -- Få item-link og quantity
-    local itemLink, quantity = string.match(message, ".*(%b[]).*x?(%d*)")
-    quantity = tonumber(quantity) or 1
+    -- Classic chat-loot har ofte format som:
+    --  - "You receive loot: [Item] (x3)"
+    --  - "You receive loot: [Item] x3"
+    local itemLink = string.match(message, "(%b[])")
+    local quantityStr =
+        string.match(message, "%(x(%d+)%)") -- (x3)
+        or string.match(message, "x(%d+)") -- x3
+        or nil
+    if not itemLink then
+        return
+    end
+    local quantity = tonumber(quantityStr) or 1
 
     -- Logg for debug
     print("Loot detected:", itemLink, "x"..quantity)
 
     -- Legg inn i database
     LootLoggerClassic_AddLootEntry(itemLink, quantity)
+
+    -- Oppdater UI-tall mens vinduet er åpent
+    if LootLoggerMainFrame and LootLoggerMainFrame:IsShown() and UpdateLootList then
+        UpdateLootList()
+    end
 
 end)

@@ -91,7 +91,7 @@ Example row:
 
 * [x] Add rarity filter `common/uncommon/rare/epic`
 * [x] Add item name search
-* [ ] Add session loot counter
+* [x] Add session loot counter
 
 ---
 

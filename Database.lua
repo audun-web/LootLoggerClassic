@@ -22,6 +22,9 @@ local function AddLootEntry(itemLink, quantity)
 
     table.insert(LootLoggerClassicDB.loot, entry)
 
+    -- inkrementer session-teller (resettes ved addon-load)
+    LootLoggerSessionItems = (LootLoggerSessionItems or 0) + (quantity or 1)
+
     print("Loot logged:", itemLink, "x"..quantity)
 
 end
@@ -36,6 +39,10 @@ function GetTotalItemsLooted()
     end
 
     return total
+end
+
+function GetSessionItemsLooted()
+    return LootLoggerSessionItems or 0
 end
 
 LootLoggerClassic_AddLootEntry = AddLootEntry

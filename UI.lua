@@ -156,6 +156,9 @@ end)
 local totalText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 totalText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -20)
 
+local sessionText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+sessionText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -38)
+
 local dropdown = CreateFrame("Frame", "LootLoggerFilterDropdown", LootLoggerFrame, "UIDropDownMenuTemplate") -- lager filter dropdown
 dropdown:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -6)
 
@@ -278,4 +281,5 @@ function UpdateLootList() -- bygger opp loot-lista i UI på nytt
     content:SetHeight(-yOffset) -- setter høyde på scroll-innholdet basert på antall rader
 
     totalText:SetText("Total items: " .. GetTotalItemsLooted()) -- oppdaterer total antall loota items
+    sessionText:SetText("Session items: " .. GetSessionItemsLooted()) -- oppdaterer antall loot denne økten
 end
