@@ -73,6 +73,7 @@ LootLoggerFrame:SetBackdropColor(0, 0, 0, 0.95) -- gjør bakgrunn litt gjennomsi
 LootLoggerFrame:Hide()
 
 -- minimap button
+-- denne knappen festes til Minimap og kan dras rundt kanten
 local minimapButton = CreateFrame("Button", "LootLoggerMinimapButton", Minimap)
 minimapButton:SetSize(31, 31)
 minimapButton:SetFrameStrata("HIGH")
@@ -82,19 +83,20 @@ minimapButton:EnableMouse(true)
 minimapButton:RegisterForClicks("LeftButtonUp")
 minimapButton:RegisterForDrag("LeftButton")
 
-minimapButton:SetNormalTexture("Interface/ICONS/INV_Misc_Coin_01")
+minimapButton:SetNormalTexture("Interface/ICONS/INV_Misc_Coin_01") -- ikon som vises i knappen
 local icon = minimapButton:GetNormalTexture()
 icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 icon:ClearAllPoints()
+-- klassisk minimap-knapp-offset (matcher tracking-border best visuelt)
 icon:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 7, -5)
 icon:SetPoint("BOTTOMRIGHT", minimapButton, "BOTTOMRIGHT", -5, 7)
 
 local border = minimapButton:CreateTexture(nil, "OVERLAY")
-border:SetTexture("Interface/Minimap/MiniMap-TrackingBorder")
+border:SetTexture("Interface/Minimap/MiniMap-TrackingBorder") -- gull-ring rundt knappen
 border:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 0, 0)
 border:SetSize(53, 53)
 
-minimapButton:SetHighlightTexture("Interface/Minimap/UI-Minimap-ZoomButton-Highlight")
+minimapButton:SetHighlightTexture("Interface/Minimap/UI-Minimap-ZoomButton-Highlight") -- blå hover-glow
 
 local function SetMinimapButtonPosition(angleDegrees)
     local angle = math.rad(angleDegrees or 225)
@@ -105,6 +107,7 @@ local function SetMinimapButtonPosition(angleDegrees)
     minimapButton:SetPoint("CENTER", Minimap, "CENTER", x, y)
 end
 
+-- lagrer vinkel i SavedVariables så posisjon huskes mellom sessions/reload
 if LootLoggerClassicDB.minimapAngle == nil then
     LootLoggerClassicDB.minimapAngle = 225
 end
@@ -120,6 +123,7 @@ minimapButton:SetScript("OnClick", function()
 end)
 
 minimapButton:SetScript("OnMouseDown", function()
+    -- liten "pressed" effekt når knappen trykkes inn
     icon:ClearAllPoints()
     icon:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 8, -6)
     icon:SetPoint("BOTTOMRIGHT", minimapButton, "BOTTOMRIGHT", -6, 8)
@@ -143,6 +147,7 @@ minimapButton:SetScript("OnLeave", function()
 end)
 
 minimapButton:SetScript("OnDragStart", function(self)
+    -- oppdaterer knapp-posisjon kontinuerlig mens venstre museknapp holdes inne
     self:SetScript("OnUpdate", function(btn)
         local mx, my = Minimap:GetCenter()
         local cx, cy = GetCursorPosition()
@@ -155,6 +160,7 @@ minimapButton:SetScript("OnDragStart", function(self)
             angle = angle + 360
         end
 
+        -- lagre ny vinkel + flytt knapp visuelt
         LootLoggerClassicDB.minimapAngle = angle
         SetMinimapButtonPosition(angle)
     end)
@@ -262,6 +268,7 @@ totalText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -20)
 local sessionText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 sessionText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -38)
 
+-- henter addon-versjon direkte fra .toc
 local addonVersion = GetAddOnMetadata("LootLoggerClassic", "Version") or "1.0"
 local versionText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 versionText:SetPoint("BOTTOMLEFT", LootLoggerFrame, "BOTTOMLEFT", 12, 12)
@@ -292,6 +299,19 @@ UIDropDownMenu_Initialize(dropdown, function(self, level) -- fyller dropdown med
     CreateOption("Rare", "RARE") 
     CreateOption("Epic", "EPIC")
 
+end)
+
+local clearHistoryButton = CreateFrame("Button", nil, LootLoggerFrame, "UIPanelButtonTemplate")
+clearHistoryButton:SetSize(100, 22)
+clearHistoryButton:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -50)
+clearHistoryButton:SetText("Clear History")
+clearHistoryButton:SetScript("OnClick", function()
+    -- lar bruker tømme historikk fra UI uten slash-kommando
+    if LootLoggerClassicDB and LootLoggerClassicDB.loot then
+        LootLoggerClassicDB.loot = {}
+        print("Loot history cleared from UI button.")
+        UpdateLootList()
+    end
 end)
 
 

@@ -34,6 +34,7 @@ function GetTotalItemsLooted()
 
     local total = 0
 
+    -- summerer quantity for alle entries i databasen
     for i, entry in ipairs(LootLoggerClassicDB.loot) do
         total = total + (entry.quantity or 1) -- legger til en eller total menge items lootet in i total
     end
@@ -42,7 +43,9 @@ function GetTotalItemsLooted()
 end
 
 function GetSessionItemsLooted()
+    -- viser kun loot for nåværende session (resettes ved reload/login)
     return LootLoggerSessionItems or 0
 end
 
+-- eksporterer funksjonen globalt så Events.lua kan bruke den
 LootLoggerClassic_AddLootEntry = AddLootEntry

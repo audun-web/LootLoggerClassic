@@ -23,6 +23,7 @@ SlashCmdList["LLHISTORY"] = function()
 
     print("=== Loot Database ===")
 
+    -- går gjennom hele historikken og printer alt i chat
     for i, entry in ipairs(LootLoggerClassicDB.loot) do local itemName = string.match(entry.item, "%[(.-)%]") -- hent navn 
         local realLink = select(2, GetItemInfo(itemName)) or entry.item print(i .. ": " .. realLink .. " x" .. entry.quantity .. " | " .. entry.time .. " | " .. entry.date .. " | " .. entry.zone) 
     end
@@ -33,6 +34,7 @@ end
 
 SLASH_LLCLEAR1 = "/llclear"
 SlashCmdList["LLCLEAR"] = function()
+    -- tømmer hele loot-tabellen i databasen
     if LootLoggerClassicDB and LootLoggerClassicDB.loot then
         LootLoggerClassicDB.loot = {}
         print("Loot database cleared!")
@@ -44,6 +46,7 @@ end
 
 SLASH_LOOTLOGGER1 = "/lootlogger"
 SlashCmdList["LOOTLOGGER"] = function()
+    -- toggler hovedvinduet av/på
     if LootLoggerMainFrame:IsShown() then
         LootLoggerMainFrame:Hide()
     else
