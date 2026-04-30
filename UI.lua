@@ -48,6 +48,17 @@ end
 
 LootLoggerFrame:SetSize(700, 450) -- størrelse
 LootLoggerFrame:SetPoint("CENTER") -- posisjon
+LootLoggerFrame:SetMovable(true) -- gjør vinduet flyttbart
+LootLoggerFrame:EnableMouse(true) -- lar musen starte drag
+LootLoggerFrame:RegisterForDrag("LeftButton") -- venstreklikk for dragging
+
+LootLoggerFrame:SetScript("OnDragStart", function(self)
+    self:StartMoving()
+end)
+
+LootLoggerFrame:SetScript("OnDragStop", function(self)
+    self:StopMovingOrSizing()
+end)
 
 LootLoggerFrame:SetBackdrop({ -- utseende
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -60,6 +71,98 @@ LootLoggerFrame:SetBackdrop({ -- utseende
 LootLoggerFrame:SetBackdropColor(0, 0, 0, 0.95) -- gjør bakgrunn litt gjennomsiktig
 
 LootLoggerFrame:Hide()
+
+-- minimap button
+local minimapButton = CreateFrame("Button", "LootLoggerMinimapButton", Minimap)
+minimapButton:SetSize(31, 31)
+minimapButton:SetFrameStrata("HIGH")
+minimapButton:SetFrameLevel(Minimap:GetFrameLevel() + 5)
+minimapButton:SetMovable(true)
+minimapButton:EnableMouse(true)
+minimapButton:RegisterForClicks("LeftButtonUp")
+minimapButton:RegisterForDrag("LeftButton")
+
+minimapButton:SetNormalTexture("Interface/ICONS/INV_Misc_Coin_01")
+local icon = minimapButton:GetNormalTexture()
+icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+icon:ClearAllPoints()
+icon:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 7, -5)
+icon:SetPoint("BOTTOMRIGHT", minimapButton, "BOTTOMRIGHT", -5, 7)
+
+local border = minimapButton:CreateTexture(nil, "OVERLAY")
+border:SetTexture("Interface/Minimap/MiniMap-TrackingBorder")
+border:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 0, 0)
+border:SetSize(53, 53)
+
+minimapButton:SetHighlightTexture("Interface/Minimap/UI-Minimap-ZoomButton-Highlight")
+
+local function SetMinimapButtonPosition(angleDegrees)
+    local angle = math.rad(angleDegrees or 225)
+    local radius = 80
+    local x = math.cos(angle) * radius
+    local y = math.sin(angle) * radius
+    minimapButton:ClearAllPoints()
+    minimapButton:SetPoint("CENTER", Minimap, "CENTER", x, y)
+end
+
+if LootLoggerClassicDB.minimapAngle == nil then
+    LootLoggerClassicDB.minimapAngle = 225
+end
+SetMinimapButtonPosition(LootLoggerClassicDB.minimapAngle)
+
+minimapButton:SetScript("OnClick", function()
+    if LootLoggerMainFrame:IsShown() then
+        LootLoggerMainFrame:Hide()
+    else
+        LootLoggerMainFrame:Show()
+        UpdateLootList()
+    end
+end)
+
+minimapButton:SetScript("OnMouseDown", function()
+    icon:ClearAllPoints()
+    icon:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 8, -6)
+    icon:SetPoint("BOTTOMRIGHT", minimapButton, "BOTTOMRIGHT", -6, 8)
+end)
+
+minimapButton:SetScript("OnMouseUp", function()
+    icon:ClearAllPoints()
+    icon:SetPoint("TOPLEFT", minimapButton, "TOPLEFT", 7, -5)
+    icon:SetPoint("BOTTOMRIGHT", minimapButton, "BOTTOMRIGHT", -5, 7)
+end)
+
+minimapButton:SetScript("OnEnter", function(self)
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:SetText("LootLoggerClassic")
+    GameTooltip:AddLine("Left-click: Open/Close loot history", 1, 1, 1)
+    GameTooltip:Show()
+end)
+
+minimapButton:SetScript("OnLeave", function()
+    GameTooltip:Hide()
+end)
+
+minimapButton:SetScript("OnDragStart", function(self)
+    self:SetScript("OnUpdate", function(btn)
+        local mx, my = Minimap:GetCenter()
+        local cx, cy = GetCursorPosition()
+        local scale = UIParent:GetEffectiveScale()
+        cx = cx / scale
+        cy = cy / scale
+
+        local angle = math.deg(math.atan2(cy - my, cx - mx))
+        if angle < 0 then
+            angle = angle + 360
+        end
+
+        LootLoggerClassicDB.minimapAngle = angle
+        SetMinimapButtonPosition(angle)
+    end)
+end)
+
+minimapButton:SetScript("OnDragStop", function(self)
+    self:SetScript("OnUpdate", nil)
+end)
 
 
 local titleText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge") -- tekst
@@ -158,6 +261,11 @@ totalText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -20)
 
 local sessionText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 sessionText:SetPoint("TOPRIGHT", LootLoggerFrame, "TOPRIGHT", -40, -38)
+
+local addonVersion = GetAddOnMetadata("LootLoggerClassic", "Version") or "1.0"
+local versionText = LootLoggerFrame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+versionText:SetPoint("BOTTOMLEFT", LootLoggerFrame, "BOTTOMLEFT", 12, 12)
+versionText:SetText("Version: " .. addonVersion)
 
 local dropdown = CreateFrame("Frame", "LootLoggerFilterDropdown", LootLoggerFrame, "UIDropDownMenuTemplate") -- lager filter dropdown
 dropdown:SetPoint("TOPLEFT", LootLoggerFrame, "TOPLEFT", 10, -6)

@@ -97,12 +97,9 @@ Example row:
 
 # Phase 9 - Advanced Polish
 
-* [ ] Add draggable UI window
-* [ ] Add minimap button
-* [ ] Add interface options menu
-* [ ] Add sound notification for rare drops
-* [ ] Optimize performance for large loot history
-* [ ] Add version number display in UI
+* [x] Add draggable UI window
+* [x] Add minimap button
+* [x] Add version number display in UI
 
 ---
 
